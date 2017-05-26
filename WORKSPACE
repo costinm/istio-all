@@ -8,26 +8,91 @@ local_repository(
 load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
 load("@envoy//bazel:cc_configure.bzl", "cc_configure")
 
-envoy_dependencies()
-cc_configure()
+# From original proxy WORKSPACE
+envoy_dependencies(skip_protobuf_bzl = True, skip_targets=["googletest", "protobuf", "protoc", "lightstep", "ssl"])
+
+# Envoy uses G++
+#cc_configure()
 
 ############### Proxy and mixer
 
+# Using the protobuf_bzl name, to make envoy happy (since it's hardcoding @protobuf_bzl in envoy_build_system)
+
 bind(
-    name = "protobuf_git",
-    actual = "//third_party/protobuf",
+    name = "mixer_client_lib",
+    actual = "//src/mixerclient:mixer_client_lib",
 )
 
-
-################ Protobuf dependencies
 bind(
-    name = "nanopb",
-    actual = "//third_party/nanopb",
+    name = "protoc",
+    actual = "@protobuf_bzl//:protoc",
+)
+
+bind(
+    name = "protobuf",
+    actual = "@protobuf_bzl//:protobuf",
+)
+
+bind(
+    name = "cc_wkt_protos",
+    actual = "@protobuf_bzl//:cc_wkt_protos",
+)
+
+bind(
+    name = "cc_wkt_protos_genproto",
+    actual = "@protobuf_bzl//:cc_wkt_protos_genproto",
+)
+
+bind(
+    name = "protobuf_compiler",
+    actual = "@protobuf_bzl//:protoc_lib",
+)
+
+bind(
+    name = "protobuf_clib",
+    actual = "@protobuf_bzl//:protoc_lib",
+)
+bind(
+    name = "boringssl_crypto",
+    actual = "@boringssl//:crypto",
+)
+bind(
+    name = "crypto",
+    actual = "@boringssl//:crypto",
 )
 
 bind(
     name = "libssl",
-    actual = "@submodule_boringssl//:ssl",
+    actual = "@boringssl//:ssl",
+)
+
+bind(
+    name = "ssl",
+    actual = "@boringssl//:ssl",
+)
+
+bind(
+            name = "grpc++",
+            actual = "@grpc_git//:grpc++",
+)
+
+bind(
+    name = "mixer_api_cc_proto",
+    actual = "@mixerapi_git//:mixer_api_cc_proto",
+)
+bind(
+            name = "cc_wkt_protos",
+            actual = "@protobuf_bzl//:cc_wkt_protos",
+)
+
+bind(
+            name = "lightstep",
+            actual = "@lightstep_git//:lightstep_core",
+)
+################ Protobuf dependencies
+bind(
+    name = "nanopb",
+    actual = "//third_party/nanopb",
 )
 
 bind(
@@ -37,17 +102,17 @@ bind(
 
 bind(
     name = "protobuf",
-    actual = "@submodule_protobuf//:protobuf",
+    actual = "@protobuf_bzl//:protobuf",
 )
 
 bind(
     name = "protobuf_clib",
-    actual = "@submodule_protobuf//:protoc_lib",
+    actual = "@protobuf_bzl//:protoc_lib",
 )
 
 bind(
     name = "protocol_compiler",
-    actual = "@submodule_protobuf//:protoc",
+    actual = "@protobuf_bzl//:protoc",
 )
 
 bind(
@@ -71,7 +136,7 @@ bind(
 )
 
 new_local_repository(
-    name = "submodule_boringssl",
+    name = "boringssl",
     build_file = "third_party/boringssl-with-bazel/BUILD",
     path = "third_party/boringssl-with-bazel",
 )
@@ -83,7 +148,7 @@ new_local_repository(
 )
 
 new_local_repository(
-    name = "submodule_protobuf",
+    name = "protobuf_bzl",
     build_file = "third_party/protobuf/BUILD",
     path = "third_party/protobuf",
 )
@@ -109,4 +174,27 @@ new_local_repository(
     name = "submodule_cares",
     path = "third_party/cares",
     build_file = "third_party/cares/cares.BUILD",
+)
+
+new_local_repository(
+    name = "mixerapi_git",
+    path = "src/api",
+    build_file = "src/api.BUILD",
+)
+
+local_repository(
+    name = "grpc_git",
+    path = "src/grpc",
+)
+
+new_local_repository(
+    name = "lightstep_git",
+    path = "src/lightstep-tracer",
+    build_file = "src/lightstep.BUILD"
+)
+
+new_local_repository(
+    name = "lightstep_common_git",
+    path = "src/lightstep-tracer-common",
+    build_file = "src/lightstep_common.BUILD"
 )
