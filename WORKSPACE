@@ -1,7 +1,25 @@
+############### Envoy module requirements.
+local_repository(
+
+    name = "envoy",
+    path = "envoy",
+)
+
+load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
+load("@envoy//bazel:cc_configure.bzl", "cc_configure")
+
+envoy_dependencies()
+cc_configure()
+
+############### Proxy and mixer
+
+bind(
+    name = "protobuf_git",
+    actual = "//third_party/protobuf",
+)
 
 
-
-# Protobuf dependencies
+################ Protobuf dependencies
 bind(
     name = "nanopb",
     actual = "//third_party/nanopb",
