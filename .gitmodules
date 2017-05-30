@@ -8,8 +8,8 @@
 	branch = costin
 [submodule "src/proxy"]
 	path = src/proxy
-	url = https://github.com/istio/proxy.git
-	branch = unary
+	url = https://github.com/costinm/proxy.git
+	branch = costin
 [submodule "src/mixer"]
 	path = src/mixer
 	url = https://github.com/istio/mixer.git
