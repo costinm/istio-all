@@ -31,3 +31,6 @@
 [submodule "src/spdlog"]
 	path = src/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "src/thrift"]
+	path = src/thrift
+	url = https://github.com/apache/thrift.git
