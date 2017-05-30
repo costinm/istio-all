@@ -4,8 +4,8 @@
 	branch = unary
 [submodule "src/api"]
 	path = src/api
-	url = https://github.com/istio/api.git
-	branch = unary
+	url = https://github.com/costinm/api.git
+	branch = costin
 [submodule "src/proxy"]
 	path = src/proxy
 	url = https://github.com/istio/proxy.git
@@ -28,3 +28,6 @@
 	path = src/lightstep-tracer-common
 	url = https://github.com/lightstep/lightstep-tracer-common.git
 	branch = cbbecd671c1ae1f20ae873c5da688c8c14d04ec3
+[submodule "src/spdlog"]
+	path = src/spdlog
+	url = https://github.com/gabime/spdlog.git

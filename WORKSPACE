@@ -1,17 +1,26 @@
 ############### Envoy module requirements.
-local_repository(
-
+new_local_repository(
     name = "envoy",
     path = "envoy",
+    build_file = "src/envoy.BUILD"
 )
 
-load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
-load("@envoy//bazel:cc_configure.bzl", "cc_configure")
+# load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
+# load("@envoy//bazel:cc_configure.bzl", "cc_configure")
 
 # From original proxy WORKSPACE
-envoy_dependencies(skip_protobuf_bzl = True, skip_targets=["googletest", "protobuf", "protoc", "lightstep", "ssl"])
+#envoy_dependencies(skip_protobuf_bzl = True, skip_targets=["googletest", "protobuf", "protoc", "lightstep", "ssl"])
+# envoy_dependencies(skip_protobuf_bzl = True)
 
-# Envoy uses G++
+# Envoy BUILD files use things like:
+# //include/envoy/ssl:context_interface
+# The 'deps' do clone and copy all includes to THIRDPARTY_BUILD/include, lib
+#
+# Problems
+# envoy_build_system doesn't allow caller to override anything
+# defines a separate namespace
+
+# Envoy overrides everything to use G++ and some pre-defined flags. Zlib doesn't like that
 #cc_configure()
 
 ############### Proxy and mixer
@@ -21,6 +30,11 @@ envoy_dependencies(skip_protobuf_bzl = True, skip_targets=["googletest", "protob
 bind(
     name = "mixer_client_lib",
     actual = "//src/mixerclient:mixer_client_lib",
+)
+
+bind(
+    name = "spdlog",
+    actual = "@spdlog_git//:spdlog",
 )
 
 bind(
@@ -197,4 +211,10 @@ new_local_repository(
     name = "lightstep_common_git",
     path = "src/lightstep-tracer-common",
     build_file = "src/lightstep_common.BUILD"
+)
+
+new_local_repository(
+    name = "spdlog_git",
+    path = "src/spdlog",
+    build_file = "src/spdlog.BUILD"
 )
