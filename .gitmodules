@@ -1,7 +1,7 @@
 [submodule "src/mixerclient"]
 	path = src/mixerclient
-	url = https://github.com/istio/mixerclient.git
-	branch = unary
+	url = https://github.com/costinm/mixerclient.git
+	branch = costin
 [submodule "src/api"]
 	path = src/api
 	url = https://github.com/costinm/api.git
