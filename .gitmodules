@@ -23,6 +23,7 @@
 [submodule "src/lightstep-tracer"]
 	path = src/lightstep-tracer
 	url = https://github.com/lightstep/lightstep-tracer-cpp.git
+        branch = v0_36
 [submodule "src/lightstep-tracer-common"]
 	path = src/lightstep-tracer-common
 	url = https://github.com/lightstep/lightstep-tracer-common.git
@@ -54,6 +55,7 @@
 [submodule "src/boringssl"]
 	path = src/boringssl
 	url = https://github.com/google/boringssl
+        brahnc = chromium-stable
 [submodule "src/backward"]
 	path = src/backward
 	url = https://github.com/bombela/backward-cpp
