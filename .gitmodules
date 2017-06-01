@@ -23,14 +23,40 @@
 [submodule "src/lightstep-tracer"]
 	path = src/lightstep-tracer
 	url = https://github.com/lightstep/lightstep-tracer-cpp.git
-	branch = f1dc8f3dfd529350e053fd21273e627f409ae428
 [submodule "src/lightstep-tracer-common"]
 	path = src/lightstep-tracer-common
 	url = https://github.com/lightstep/lightstep-tracer-common.git
-	branch = cbbecd671c1ae1f20ae873c5da688c8c14d04ec3
 [submodule "src/spdlog"]
 	path = src/spdlog
 	url = https://github.com/gabime/spdlog.git
 [submodule "src/thrift"]
 	path = src/thrift
 	url = https://github.com/apache/thrift.git
+[submodule "src/libevent"]
+	path = src/libevent
+	url = https://github.com/libevent/libevent.git
+[submodule "src/http-parser"]
+	path = src/http-parser
+	url = https://github.com/nodejs/http-parser
+[submodule "src/nghttp2"]
+	path = src/nghttp2
+	url = https://github.com/nghttp2/nghttp2
+[submodule "src/rapidjson"]
+	path = src/rapidjson
+	url = https://github.com/miloyip/rapidjson
+[submodule "src/tclap"]
+	path = src/tclap
+	url = https://github.com/eile/tclap
+[submodule "src/protobuf"]
+	path = src/protobuf
+	url = https://github.com/google/protobuf
+	branch = v3.2.0
+[submodule "src/boringssl"]
+	path = src/boringssl
+	url = https://github.com/google/boringssl
+[submodule "src/backward"]
+	path = src/backward
+	url = https://github.com/bombela/backward-cpp
+[submodule "src/cares"]
+	path = src/cares
+	url = https://github.com/c-ares/c-ares
