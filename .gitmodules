@@ -10,13 +10,6 @@
 	path = src/proxy
 	url = https://github.com/costinm/proxy.git
 	branch = costin
-[submodule "src/mixer"]
-	path = src/mixer
-	url = https://github.com/istio/mixer.git
-	branch = unary
-[submodule "src/grpc"]
-	path = src/grpc
-	url = https://github.com/grpc/grpc.git
 [submodule "envoy"]
 	path = envoy
 	url = https://github.com/lyft/envoy.git
@@ -30,9 +23,6 @@
 [submodule "src/spdlog"]
 	path = src/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "src/thrift"]
-	path = src/thrift
-	url = https://github.com/apache/thrift.git
 [submodule "src/libevent"]
 	path = src/libevent
 	url = https://github.com/libevent/libevent.git
