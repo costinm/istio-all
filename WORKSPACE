@@ -86,14 +86,10 @@ bind(
 )
 
 bind(
-            name = "grpc++",
-            actual = "@grpc_git//:grpc++",
-)
-
-bind(
     name = "mixer_api_cc_proto",
     actual = "@mixerapi_git//:mixer_api_cc_proto",
 )
+
 bind(
             name = "cc_wkt_protos",
             actual = "@protobuf_bzl//:cc_wkt_protos",

@@ -51,3 +51,4 @@ set(CARES_SOURCE
         )
 
 add_library(cares STATIC ${CARES_SOURCE})
+set_target_properties(cares PROPERTIES COMPILE_FLAGS -DHAVE_CONFIG_H=1)
