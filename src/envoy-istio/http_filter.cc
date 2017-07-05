@@ -14,8 +14,10 @@
  */
 
 #include <google/protobuf/stubs/status.h>
+#include <common/common/logger.h>
+#include <envoy/grpc/rpc_channel.h>
+#include <common/grpc/rpc_channel_impl.h>
 #include "common/common/base64.h"
-#include "common/common/logger.h"
 #include "common/http/headers.h"
 #include "common/http/utility.h"
 #include "envoy/server/instance.h"
@@ -107,15 +109,17 @@ int HttpCode(int code) {
 
 }  // namespace
 
+    // Created at startup, from initialize().
 class Config : public Logger::Loggable<Logger::Id::http> {
- private:
-  Upstream::ClusterManager& cm_;
-  std::string forward_attributes_;
-  MixerConfig mixer_config_;
 
  public:
+    std::string forward_attributes_;
+    MixerConfig mixer_config_;
+    Upstream::ClusterManager& cm_;
+    Server::Instance& server_;
+
   Config(const Json::Object& config, Server::Instance& server)
-      : cm_(server.clusterManager()) {
+      : cm_(server.clusterManager()), server_(server) {
     mixer_config_.Load(config);
     if (mixer_config_.mixer_server.empty()) {
       log().error(
@@ -124,6 +128,8 @@ class Config : public Logger::Loggable<Logger::Id::http> {
     } else {
       log().debug("Called Mixer::Config constructor with mixer_server: ",
                   mixer_config_.mixer_server);
+      // ThreadLocalCluster*
+      server.clusterManager().get(mixer_config_.mixer_server);
     }
 
     if (!mixer_config_.forward_attributes.empty()) {
@@ -134,15 +140,18 @@ class Config : public Logger::Loggable<Logger::Id::http> {
       log().debug("Mixer forward attributes set: ", serialized_str);
     }
 
+
   }
 
   const std::string& forward_attributes() const { return forward_attributes_; }
 };
 
 typedef std::shared_ptr<Config> ConfigPtr;
+    const std::chrono::milliseconds kGrpcRequestTimeoutMs(5000);
 
 class Instance : public Http::StreamDecoderFilter,
                  public Http::AccessLog::Instance,
+                 public Grpc::RpcChannelCallbacks,
                  public std::enable_shared_from_this<Instance> {
  private:
   //std::shared_ptr<HttpControl> http_control_;
@@ -189,14 +198,50 @@ class Instance : public Http::StreamDecoderFilter,
   }
 
  public:
+    Grpc::RpcChannelPtr rpcChannel;
+    ::istio::mixer::v1::Mixer_Stub *stub_;
+    ::istio::mixer::v1::CheckResponse* response;
+
+    // One per thread
   Instance(ConfigPtr config)
       : //http_control_(config->http_control()),
         config_(config),
         state_(NotStarted),
         initiating_call_(false),
         check_status_code_(HttpCode(StatusCode::UNKNOWN)) {
-    Log().debug("Called Mixer::Instance : {}", __func__);
+    Log().info("Called Mixer::Instance : {}", __func__);
+
+    // See grpc_transport.cc
+    rpcChannel = Grpc::RpcChannelPtr{new Grpc::RpcChannelImpl{
+            config_.get()->server_.clusterManager(),
+            config.get()->mixer_config_.mixer_server,
+            *this,
+            Optional<std::chrono::milliseconds>(kGrpcRequestTimeoutMs)}};
+
+      stub_ = new ::istio::mixer::v1::Mixer_Stub(rpcChannel.get());
   }
+
+    // GRPC callbacks
+    void onPreRequestCustomizeHeaders(Http::HeaderMap& headers) override {}
+
+    void onSuccess() override {checkDone(response);};
+
+    void onFailure(const Optional<uint64_t>& grpc_status,
+                   const std::string& message) override {
+      state_ = Responded;
+      if (grpc_status.valid()) {
+        check_status_code_ = HttpCode(grpc_status.value());
+      } else {
+        check_status_code_ = HttpCode(500);
+      }
+
+      printf("Hi");
+      Utility::sendLocalReply(*decoder_callbacks_, Code(check_status_code_),
+                                message);
+
+      };
+
+    // END GRPC callbacks
 
   // Returns a shared pointer of this object.
   std::shared_ptr<Instance> GetPtr() { return shared_from_this(); }
@@ -226,18 +271,25 @@ class Instance : public Http::StreamDecoderFilter,
     }
 
     auto instance = GetPtr();
+    ::istio::mixer::v1::CheckRequest request;
+
+    stub_->Check(nullptr, &request, response, nullptr);
+
     /*
       FillCheckAttributes(headers, &request_data->attributes);
-  SetStringAttribute(kOriginUser, origin_user, &request_data->attributes);
-
-    http_control_->Check(
+      SetStringAttribute(kOriginUser, origin_user, &request_data->attributes);
+      http_control_->Check(
         request_data_, headers, origin_user,
         [instance](const Status& status) { instance->completeCheck(status); });
 
      */
+
+    // TODO(costin): we may still have a race condition - if RPC finishes and calls completeCheck, before
+    // initiating_call is set to false.
     initiating_call_ = false;
 
     if (state_ == Complete) {
+      // RPC finished before the method returned.
       return FilterHeadersStatus::Continue;
     }
     Log().debug("Called Mixer::Instance : {} Stop", __func__);
@@ -258,7 +310,29 @@ class Instance : public Http::StreamDecoderFilter,
     return FilterDataStatus::Continue;
   }
 
-  FilterTrailersStatus decodeTrailers(HeaderMap& trailers) override {
+    void checkDone(const ::istio::mixer::v1::CheckResponse* status) {
+      Log().debug("Called Mixer::Instance : check complete {}",
+                  status->DebugString());
+      // This stream has been reset, abort the callback.
+      if (state_ == Responded) {
+        return;
+      }
+//      if (!status.ok() && state_ != Responded) {
+//        state_ = Responded;
+//        check_status_code_ = HttpCode(status.error_code());
+//        Utility::sendLocalReply(*decoder_callbacks_, Code(check_status_code_),
+//                                status.ToString());
+//        return;
+//      }
+
+      state_ = Complete;
+      if (!initiating_call_) {
+        decoder_callbacks_->continueDecoding();
+      }
+    }
+
+
+    FilterTrailersStatus decodeTrailers(HeaderMap& trailers) override {
     if (mixer_disabled_) {
       return FilterTrailersStatus::Continue;
     }

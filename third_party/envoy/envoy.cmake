@@ -164,7 +164,7 @@ set(ENVOY_SOURCE_FILES
 
 add_executable(envoy ${ENVOY_SOURCE_FILES}
         $<TARGET_OBJECTS:istioproxy>
-        #$<TARGET_OBJECTS:envoy-istio>
+        $<TARGET_OBJECTS:envoy-istio>
         )
 target_link_libraries (envoy PUBLIC -lpthread -lrt)
 target_link_libraries(envoy PUBLIC tracer)

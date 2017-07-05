@@ -77,7 +77,11 @@
                     {
                       "timeout_ms": 0,
                       "prefix": "/",
-                      "cluster": "service2"
+                      "cluster": "service2",
+                      "opaque_config": {
+                        "mixer_control": "on",
+                        "mixer_forward": "off"
+                      }
                     }
                   ]
                 }
@@ -91,9 +95,9 @@
             "filters": [
               {
                 "type": "decoder",
-                "name": "mixer",
+                "name": "istiomixer",
                 "config": {
-                  "mixer_server": "localhost:9091",
+                  "mixer_server": "mixer_server",
                   "forward_attributes": {
                     "source.uid": "POD11",
                     "source.namespace": "XYZ11"

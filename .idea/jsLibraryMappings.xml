@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
+    <excludedPredefinedLibrary name="istio-all/bazel-istio-all/external/grpc_git/src/node/health_check/node_modules" />
+    <excludedPredefinedLibrary name="istio-all/bazel-istio-all/src/grpc/src/node/health_check/node_modules" />
     <excludedPredefinedLibrary name="istio-all/src/grpc/src/node/health_check/node_modules" />
   </component>
 </project>
